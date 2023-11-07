@@ -22,7 +22,7 @@ const SPECIAL_COMMANDS = {
     bluealliance: 'https://www.thebluealliance.com/team/2212'
 }; //set up special commands for your users to use, can be disabled by setting the value to null.
 
-const TOKEN = 'MTEzMzM3Nzg0MjQ0MTM2MzUwNg.GiRhOq.xPN1mCRzIJAvLv1KXPFYgAXbsSxoEBPnDmM67Q'//'YOUR_DISCORD_BOT_TOKEN_HERE'
+const TOKEN = 'YOUR_DISCORD_BOT_TOKEN_HERE'
 const {Client, GatewayIntentBits} = require('discord.js'); //import the discord.js library
 const client = new Client({
     intents: [
