@@ -135,6 +135,14 @@ function whenIsTeamTime() {
     return remainingTime;
 }
 
+function getSpecialCommands(){
+    let allCommands = ''
+    for(const someCommand in SPECIAL_COMMANDS){
+        allCommands += '||**' + someCommand + '**||, '
+    }
+    return allCommands;
+}
+
 //fetch info about a team from the blue alliance website
 function fetchTeamLinks(someTeamNumber) {
 
@@ -206,7 +214,9 @@ client.on('messageCreate', msg => {
                 > - write the team time at the correct time and the bot will react with the TeaMoji
                 > - use the ||**teamtime**|| command to get the correct team time
                 > - use the ||**help**|| command to see all available commands
+                \nyou can also use the commands: ` + getSpecialCommands() + ` for special commands for this instance of the bot.
                 \n**note:** use the prefix **` + PREFIX + `** before any of the commands above to refer to this bot
+                \nsource code avilable at: <https://github.com/Spikes-2212-Programming-Guild/SpikesBot>
                 \nEnjoy!`
 
                 msg.channel.send(helpMessage);
