@@ -243,18 +243,18 @@ client.on('messageCreate', msg => {
                 if (Number.isInteger(teamNumber) && teamNumber > 0) {
 
                     //create a variable to store all the links
-                    let allLinks = 'here is everything about team #' + teamNumber + ':\n\n> https://www.thebluealliance.com/team/' + teamNumber + '\n'
+                    let allLinks = 'here is everything about team #' + teamNumber + ':\n\n> <https://www.thebluealliance.com/team/' + teamNumber + '>\n'
 
                     //get the links
                     fetchTeamLinks(teamNumber)
                         .then(links => {
                             //add each link to the replay message
                             links.forEach(link => {
-                                allLinks += '> ' + link + '\n'
+                                allLinks += '> <' + link + '>\n'
                             });
                             //send the message and remove the embeds
                             msg.channel.send(allLinks).then(replyMessage => {
-                                replyMessage.suppressEmbeds(true)
+                                //replyMessage.suppressEmbeds(true)
                             })
                         });
                 } else {
@@ -274,7 +274,7 @@ client.on('messageCreate', msg => {
                 let teamNumber = Number(msgContent.split(')')[1])
 
                 searchSocialMedia(searchText, teamNumber).then((link) => {
-                    msg.channel.send(link)
+                    msg.channel.send('<' + link + '>')
                 });
             }
             //frc teams
@@ -287,7 +287,7 @@ client.on('messageCreate', msg => {
 
                 //check if the number is valid
                 if (Number.isInteger(teamNumber) && teamNumber > 0) {
-                    msg.channel.send('https://www.thebluealliance.com/team/' + teamNumber)
+                    msg.channel.send('<https://www.thebluealliance.com/team/' + teamNumber + '>')
                 } else {
                     msg.reply("The team number should be a 64 bit Integer above 0")
                     msg.react('👎')
