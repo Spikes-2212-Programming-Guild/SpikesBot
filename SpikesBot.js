@@ -80,7 +80,7 @@ function sendTeamTime(channels) {
         } catch (error) {
             // this is needed because discord has some ghost channels that will not work
         }
-    }    
+    }
 
     // after sending the teamtime in all of the channels, wait a minute before timing the next messages
     const waitAMinute = () => {
@@ -190,13 +190,16 @@ function searchSocialMedia(searchItem, teamNumber) {
 
 client.on('messageCreate', msg => {
 
-    const everyoneRole = msg.guild.roles.everyone;
+    const flag = PermissionsBitField.Flags.SendMessages
+    const flag1 = PermissionsBitField.Flags.AddReactions
 
-    //get the permissions of @everyone role in the channel
-    const permissions = msg.channel.permissionsFor(everyoneRole);
+    const flag2 = msg.guild.members.me.permissions.has(PermissionsBitField.Flags.SendMessages)
+    const flag3 = msg.guild.members.me.permissions.has(PermissionsBitField.Flags.AddReactions)
 
-    //check that the message sent by a user and @everyone can send messages in the channel
-    if (!msg.author.bot && permissions.has(PermissionsBitField.Flags.SendMessages) && permissions.has(PermissionsBitField.Flags.AddReactions) && msg.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.AddReactions)) {
+    console.log(flag + "\n" + flag1 + "\n" + flag2 + "\n" + flag3 + "\n")
+
+    //check that the message sent by a user and the bot can send a message and replay in this channel
+    if (!msg.author.bot && flag2 && flag3) {
 
         //make sure the message is a message for the bot
         if (msg.content.startsWith(PREFIX)) {
