@@ -328,3 +328,4 @@ client.on('messageCreate', msg => {
 
 //login bot using token
 client.login(TOKEN);
+console.log("Finished :))))");
