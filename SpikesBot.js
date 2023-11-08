@@ -23,7 +23,7 @@ const SPECIAL_COMMANDS = {
 }; //set up special commands for your users to use, can be disabled by setting the value to null.
 
 const TOKEN = 'YOUR_DISCORD_BOT_TOKEN_HERE'
-const {Client, GatewayIntentBits} = require('discord.js'); //import the discord.js library
+const {Client, GatewayIntentBits, PermissionsBitField} = require('discord.js'); //import the discord.js library
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -67,22 +67,20 @@ function sendTeamTime(channels) {
     const now = new Date() //the current time
 
     //for each general channel from the list
-    for(const channel of channels){
-
+    for (const channel of channels) {
         //if it is the special date (example: for the team TheSpikes#2212 it is dec 22 or 22/12)
-        try{
+        try {
             if (now.getDate() === TEAMTIME.getHours() && now.getMonth() + 1 === TEAMTIME.getMinutes()) {
-                //send teamascii
-                channel.send(TEAM_ASCII)
+                // Send teamascii
+                channel.send(TEAM_ASCII);
             } else {
-                //send teamtime
-                channel.send(`${TEAMTIME.getHours().toString().padStart(2, '0')}:${TEAMTIME.getMinutes().toString().padStart(2, '0')}`)
+                // Send teamtime
+                channel.send(`${TEAMTIME.getHours().toString().padStart(2, '0')}:${TEAMTIME.getMinutes().toString().padStart(2, '0')}`);
             }
-        }
-        catch (error){
+        } catch (error) {
             // this is needed because discord has some ghost channels that will not work
         }
-    }
+    }    
 
     // after sending the teamtime in all of the channels, wait a minute before timing the next messages
     const waitAMinute = () => {
@@ -192,8 +190,14 @@ function searchSocialMedia(searchItem, teamNumber) {
 
 client.on('messageCreate', msg => {
 
-    //check that the message sent by a user
-    if (!msg.author.bot) {
+    const everyoneRole = msg.guild.roles.everyone;
+
+    //get the permissions of @everyone role in the channel
+    const permissions = msg.channel.permissionsFor(everyoneRole);
+
+    //check that the message sent by a user and @everyone can send messages in the channel
+    //we would have checked specifically for the bot but discord is stupid, and it will not work properly
+    if (!msg.author.bot && permissions.has(PermissionsBitField.Flags.SendMessages) && permissions.has(PermissionsBitField.Flags.AddReactions) && msg.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.AddReactions)) {
 
         //make sure the message is a message for the bot
         if (msg.content.startsWith(PREFIX)) {
