@@ -78,7 +78,7 @@ function sendTeamTime(channels) {
                 channel.send(`${TEAMTIME.getHours().toString().padStart(2, '0')}:${TEAMTIME.getMinutes().toString().padStart(2, '0')}`);
             }
         } catch (error) {
-            // Handle any errors that occur during sending
+            // this is needed because discord has some ghost channels that will not work
         }
     }    
 
@@ -192,7 +192,7 @@ client.on('messageCreate', msg => {
 
     const everyoneRole = msg.guild.roles.everyone;
 
-    // Check if the @everyone role has the `Send Messages` permission in the channel
+    //get the permissions of @everyone role in the channel
     const permissions = msg.channel.permissionsFor(everyoneRole);
 
     //check that the message sent by a user and @everyone can send messages in the channel
