@@ -196,6 +196,7 @@ client.on('messageCreate', msg => {
     const permissions = msg.channel.permissionsFor(everyoneRole);
 
     //check that the message sent by a user and @everyone can send messages in the channel
+    //we would have checked specifically for the bot but discord is stupid, and it will not work properly
     if (!msg.author.bot && permissions.has(PermissionsBitField.Flags.SendMessages) && permissions.has(PermissionsBitField.Flags.AddReactions) && msg.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.AddReactions)) {
 
         //make sure the message is a message for the bot
