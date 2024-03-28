@@ -82,8 +82,10 @@ function sendTeamTime(channels) {
         }
     }    
 
-    // after sending the teamtime in all of the channels, wait a minute before timing the next messages
-    const waitAMinute = () => {
+    // after sending the teamtime in all of the channels, wait a couple a bit before timing the next messages
+    // 21 hours is good because it avoids the need to take into account Summer/winter time.
+    // this is because after 21 hours the server time has been already updated.
+    const waitABit = () => {
         //set all of the general channels
         setAllGeneralChannels()
         //set timeout for the teamtime
@@ -91,7 +93,7 @@ function sendTeamTime(channels) {
             sendTeamTime(generalChannelsForTeamTime)
         }, whenIsTeamTime())
     }
-    setTimeout(waitAMinute, 60000)
+    setTimeout(waitABit, 1000 * 60 * 60 * 21)
 }
 
 // a function for setting up the new and up-to-date list of general channels from each server
@@ -129,7 +131,7 @@ function whenIsTeamTime() {
     }
 
     //return the time until the next teamtime
-    console.log("next TEAMTIME: " + remainingTime);
+    console.log("next TEAMTIME: " + remainingTime + " milliseconds or " + remainingTime/60000 + " minutes");
     return remainingTime;
 }
 
