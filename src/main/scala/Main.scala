@@ -1,14 +1,19 @@
 import discord4j.common.util.Snowflake
+import discord4j.core.`object`.command.ApplicationCommandOption
 import discord4j.core.`object`.emoji.Emoji
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.channel.MessageChannel
-import discord4j.core.{DiscordClient, GatewayDiscordClient, event}
+import discord4j.core.event.domain.interaction.{ApplicationCommandInteractionEvent, ChatInputInteractionEvent}
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.spec.MessageCreateSpec
-import discord4j.discordjson.json.MessageReferenceData
+import discord4j.core.{DiscordClient, GatewayDiscordClient, event}
+import discord4j.discordjson.json.{ApplicationCommandOptionData, ApplicationCommandRequest, MessageReferenceData}
 import discord4j.gateway.intent.{Intent, IntentSet}
+
 import java.time.{Duration, LocalDateTime, ZoneOffset}
 import java.util.concurrent.{Executors, TimeUnit}
+import scala.annotation.switch
+import scala.compiletime.ops.long
 import scala.util.boundary
 import scala.util.boundary.break
 
@@ -40,10 +45,13 @@ val client: GatewayDiscordClient = DiscordClient.create(token)
 
 // main function
 @main def SpikesBotScala(): Unit = {
+  println(asciiArt)
+  println(s"Logged in as ${client.getSelf().block().getUsername()} -> Hello world!")
   // debug message
   client.getChannelById(Snowflake.of("1133427274994155582")).ofType(classOf[MessageChannel]).block().createMessage("SpikesBot is up!").block()
   // schedule a message
   schedule2212()
+  buildCommands()
 
   // when a new message arrives :)
   client.on(classOf[MessageCreateEvent]).subscribe({ event =>
@@ -51,13 +59,30 @@ val client: GatewayDiscordClient = DiscordClient.create(token)
     val message = event.getMessage()
     boundary {
       // don't reply to yourself
-      if (message.getAuthor().get.getId() == client.getSelfId()) {
-        break()
-      }
+      if (message.getAuthor().get.getId() == client.getSelfId()) break()
       // actually reply tho
       handleMessage(message)
     }
   })
+
+  // when a new command is commanded
+  client.on(classOf[ApplicationCommandInteractionEvent], event => boundary {
+
+      event.getCommandName() match {
+        case "team" => {
+          val interaction = event.getInteraction().getCommandInteraction().flatMap(thing => thing.getOption("team-number").get().getValue())
+          val teamNumber = interaction.get().asLong
+          if (teamNumber > 0) break(event.reply(s"https://www.thebluealliance.com/team/$teamNumber"))
+          else break(event.reply(s"Nooo!!!1!1!11!!!1! `$teamNumber` is not a valid team number :((("))
+        }
+        case "source-code" => {
+          break(event.reply("https://github.com/Spikes-2212-Programming-Guild/SpikesBot"))
+        }
+      }
+  }).subscribe();
+
+
+  // eob (end of bot)
   client.onDisconnect().block();
 }
 
@@ -89,6 +114,42 @@ def handleMessage(message: Message): Unit = {
   }
 }
 
+def buildCommands(): Unit = {
+
+  val applicationId: Long = client.getRestClient().getApplicationId().block()
+  // val testGuild: Long = 1133413135265570857l
+
+  val linkTeamCommand: ApplicationCommandRequest = ApplicationCommandRequest.builder()
+  .name("team")
+  .description("find an FRC team")
+  .addOption(ApplicationCommandOptionData.builder()
+    .name("team-number")
+    .description("please provide a team number")
+    .`type`(ApplicationCommandOption.Type.INTEGER.getValue())
+    .required(true)
+    .build()
+  ).build()
+
+  // client.getRestClient().getApplicationService()
+  // .createGuildApplicationCommand(applicationId, testGuild, linkTeamCommand)
+  // .block()
+  client.getRestClient().getApplicationService()
+  .createGlobalApplicationCommand(applicationId, linkTeamCommand)
+  .block()
+
+  val sourceCodeCommand: ApplicationCommandRequest = ApplicationCommandRequest.builder()
+  .name("source-code")
+  .description("get the source code powering this bot")
+  .build()
+
+  // client.getRestClient().getApplicationService()
+  // .createGuildApplicationCommand(applicationId, testGuild, sourceCodeCommand)
+  // .block()
+  client.getRestClient().getApplicationService()
+  .createGlobalApplicationCommand(applicationId, sourceCodeCommand)
+  .block()
+}
+
 def schedule2212(): Unit = {
 
   if (spikesTime.isBefore(LocalDateTime.now())) spikesTime = spikesTime.plusDays(1)
@@ -99,16 +160,16 @@ def schedule2212(): Unit = {
   ).toMillis
 
   scheduler.schedule((() => send2212(if(spikesTime.getDayOfMonth == 22 && spikesTime.getMonthValue() == 12) asciiArt else "22:12")): Runnable, delay, TimeUnit.MILLISECONDS)
-  println("scheduled.")
+  println("The next 22:12 message is scheduled.")
 }
 
 def send2212(messageContent: String): Unit = {
 
-  client.getGuilds().flatMap(_.getChannels()).filter(_.getName == "meow").ofType(classOf[MessageChannel]).flatMap(channel => {
+  client.getGuilds().flatMap(_.getChannels()).filter(_.getName == "general").ofType(classOf[MessageChannel]).flatMap(channel => {
     channel.createMessage(messageContent)
   }).subscribe()
 
   schedule2212()
 }
 
-def msg = "I was compiled by Scala 3. :)"
+def msg = "I was compiled and rewritten Scala 3. :)"
