@@ -172,4 +172,4 @@ def send2212(messageContent: String): Unit = {
   schedule2212()
 }
 
-def msg = "I was compiled and rewritten Scala 3. :)"
+def msg = "I was compiled and rewritten in Scala 3. :)"
