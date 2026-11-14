@@ -1,2 +1,2 @@
 # SpikesBot
-the spikes discord bot
+The Spikes discord bot, now rewritten in Scala 3!
