@@ -26,8 +26,7 @@ val asciiArt = """
 ╚██╔═██╔══╝███████╗███████╗███████╗███████╗
 ░╚═╝░╚═╝░░░╚══════╝╚══════╝╚══════╝╚══════╝
 """
-// your super secret token
-val token = "NOPE"
+
 // the scheduler
 val scheduler = Executors.newSingleThreadScheduledExecutor()
 // The Spikes#2212 time
@@ -36,22 +35,32 @@ var spikesTime = LocalDateTime.now()
   .withMinute(12)
   .withSecond(0)
   .withNano(0)
-// the discord client
-val client: GatewayDiscordClient = DiscordClient.create(token)
-    .gateway()
-    .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.MESSAGE_CONTENT)))
-    .login()
-    .block();
 
 // main function
-@main def SpikesBotScala(): Unit = {
+@main def SpikesBotScala(args: String*): Unit = {
+
+  if (args.length < 1) {
+    throw RuntimeException("where token??")
+  }
+
+  // your super secret discord token
+  val token = args(0)
+
+  // the discord client
+  val client: GatewayDiscordClient = DiscordClient.create(token)
+      .gateway()
+      .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.MESSAGE_CONTENT)))
+      .login()
+      .block();
+
+  println(args.length)
   println(asciiArt)
   println(s"Logged in as ${client.getSelf().block().getUsername()} -> Hello world!")
   // debug message
   client.getChannelById(Snowflake.of("1133427274994155582")).ofType(classOf[MessageChannel]).block().createMessage("SpikesBot is up!").block()
   // schedule a message
-  schedule2212()
-  buildCommands()
+  schedule2212(client)
+  buildCommands(client)
 
   // when a new message arrives :)
   client.on(classOf[MessageCreateEvent]).subscribe({ event =>
@@ -114,7 +123,7 @@ def handleMessage(message: Message): Unit = {
   }
 }
 
-def buildCommands(): Unit = {
+def buildCommands(client: GatewayDiscordClient): Unit = {
 
   val applicationId: Long = client.getRestClient().getApplicationId().block()
   // val testGuild: Long = 1133413135265570857l
@@ -150,7 +159,7 @@ def buildCommands(): Unit = {
   .block()
 }
 
-def schedule2212(): Unit = {
+def schedule2212(client: GatewayDiscordClient): Unit = {
 
   if (spikesTime.isBefore(LocalDateTime.now())) spikesTime = spikesTime.plusDays(1)
 
@@ -159,17 +168,17 @@ def schedule2212(): Unit = {
     spikesTime
   ).toMillis
 
-  scheduler.schedule((() => send2212(if(spikesTime.getDayOfMonth == 22 && spikesTime.getMonthValue() == 12) asciiArt else "22:12")): Runnable, delay, TimeUnit.MILLISECONDS)
+  scheduler.schedule((() => send2212(client, if(spikesTime.getDayOfMonth == 22 && spikesTime.getMonthValue() == 12) asciiArt else "22:12")): Runnable, delay, TimeUnit.MILLISECONDS)
   println("The next 22:12 message is scheduled.")
 }
 
-def send2212(messageContent: String): Unit = {
+def send2212(client: GatewayDiscordClient, messageContent: String): Unit = {
 
   client.getGuilds().flatMap(_.getChannels()).filter(_.getName == "general").ofType(classOf[MessageChannel]).flatMap(channel => {
     channel.createMessage(messageContent)
   }).subscribe()
 
-  schedule2212()
+  schedule2212(client)
 }
 
 def msg = "I was compiled and rewritten in Scala 3. :)"
