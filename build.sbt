@@ -1,5 +1,5 @@
 // enablePlugins(JavaServerAppPackaging)
-enablePlugins(JavaAppPackaging)
+enablePlugins(JavaServerAppPackaging)
 enablePlugins(DebianPlugin)
 
 val scala3Version = "3.10.1"
@@ -8,7 +8,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "spikesbot",
-    version := "0.1.0",
+    version := "0.1.1",
     scalaVersion := scala3Version,
 
     Debian / maintainer := "TheSpikes#2212 <spikes.no2212@gmail.com>",
