@@ -1,0 +1,12 @@
+[Unit]
+Description=SpikesBot service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/spikesbot <TOKEN>
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
