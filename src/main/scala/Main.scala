@@ -10,7 +10,7 @@ import discord4j.core.{DiscordClient, GatewayDiscordClient, event}
 import discord4j.discordjson.json.{ApplicationCommandOptionData, ApplicationCommandRequest, MessageReferenceData}
 import discord4j.gateway.intent.{Intent, IntentSet}
 
-import java.time.{Duration, LocalDateTime, ZoneOffset}
+import java.time.{Duration, ZoneId, ZonedDateTime}
 import java.util.concurrent.{Executors, TimeUnit}
 import scala.annotation.switch
 import scala.compiletime.ops.long
@@ -29,8 +29,10 @@ val asciiArt = """
 
 // the scheduler
 val scheduler = Executors.newSingleThreadScheduledExecutor()
+// ISR time zone
+val botZone = ZoneId.of("Asia/Jerusalem")
 // The Spikes#2212 time
-var spikesTime = LocalDateTime.now()
+var spikesTime = ZonedDateTime.now(botZone)
   .withHour(22)
   .withMinute(12)
   .withSecond(0)
@@ -39,6 +41,7 @@ var spikesTime = LocalDateTime.now()
 // main function
 @main def SpikesBotScala(args: String*): Unit = {
 
+  // spikesTime.atOffset(ZoneOffset.ofHours(2))
   if (args.length < 1) {
     throw RuntimeException("where token??")
   }
@@ -107,7 +110,7 @@ def handleMessage(message: Message): Unit = {
 
   if (message.getContent().equals("22:12") || message.getContent().equals("2212")) {
 
-    val timeStamp = message.getTimestamp().atOffset(ZoneOffset.ofHours(2))
+    val timeStamp = message.getTimestamp().atZone(botZone)//.atOffset()
     if (timeStamp.getHour == 22 && timeStamp.getMinute == 12) {
       message.addReaction(Emoji.unicode("🔩")).block()
       if (timeStamp.getSecond == 0) {
@@ -161,15 +164,18 @@ def buildCommands(client: GatewayDiscordClient): Unit = {
 
 def schedule2212(client: GatewayDiscordClient): Unit = {
 
-  if (spikesTime.isBefore(LocalDateTime.now())) spikesTime = spikesTime.plusDays(1)
+  val now = ZonedDateTime.now(botZone)
+
+  if (spikesTime.isBefore(now)) spikesTime = spikesTime.plusDays(1)
 
   val delay = Duration.between(
-    LocalDateTime.now(),
+    now,
     spikesTime
   ).toMillis
 
-  scheduler.schedule((() => send2212(client, if(spikesTime.getDayOfMonth == 22 && spikesTime.getMonthValue() == 12) asciiArt else "22:12")): Runnable, delay, TimeUnit.MILLISECONDS)
+  scheduler.schedule((() => send2212(client, if(spikesTime.getDayOfMonth == 22 && spikesTime.getMonthValue == 12) asciiArt else "22:12")): Runnable, delay, TimeUnit.MILLISECONDS)
   println("The next 22:12 message is scheduled.")
+  // println(s"The next 22:12 message is scheduled in ${delay / 1000 / 60}m.")
 }
 
 def send2212(client: GatewayDiscordClient, messageContent: String): Unit = {
