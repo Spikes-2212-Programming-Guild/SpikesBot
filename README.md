@@ -10,7 +10,7 @@ your `.deb` package will be located at `SpikesBot/target/out/jvm/scala-3.10.1/sp
 
 ## setting up
 ```bash
-sudo apt install ./spikesbot_0.1.0_all.deb
+sudo apt install ./spikesbot_0.1.2_all.deb
 ```
 
 put the [spikesbot.service](https://github.com/Spikes-2212-Programming-Guild/SpikesBot/blob/Scala3-dev/etc/systemd/system/spikesbot.service) at `/etc/systemd/system/spikesbot.service`
